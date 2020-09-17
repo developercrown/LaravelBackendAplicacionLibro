@@ -141,8 +141,6 @@ class LibroController extends Controller
 
         if($libro->count() == 1){
             $libro = $libro->first();
-            // return response()->json($libro);
-
             if (Storage::disk('imagenes')->exists($libro->uri)) {
                 return Storage::disk('imagenes')->response($libro->uri);
             } else {
