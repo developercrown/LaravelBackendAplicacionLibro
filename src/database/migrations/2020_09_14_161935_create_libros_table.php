@@ -17,7 +17,8 @@ class CreateLibrosTable extends Migration
             $table->id();
             $table->string('titulo');
             $table->string('autor');
-            $table->string('uri')->default('https://i.picsum.photos/id/217/100/100.jpg?hmac=f33EZwD0Oihm7I4y2fUQR5amAapVWLvIhkyx4D_4JyE');
+            $table->string('uri')->nullable();
+            $table->string('uri_key')->nullable();
             $table->timestamps();
         });
     }

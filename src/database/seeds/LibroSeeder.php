@@ -1,6 +1,6 @@
 <?php
 
-use App\Libro;
+use App\Models\Libro;
 use Illuminate\Database\Seeder;
 
 class LibroSeeder extends Seeder

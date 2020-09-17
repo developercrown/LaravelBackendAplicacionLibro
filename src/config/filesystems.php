@@ -64,6 +64,13 @@ return [
             'url' => env('AWS_URL'),
         ],
 
+        'imagenes' => [
+            'driver' => 'local',
+            'root' => storage_path('app/imagenes'),
+            'url' => env('APP_URL').'storage',
+            'visibility' => 'private',
+        ],
+
     ],
 
     /*

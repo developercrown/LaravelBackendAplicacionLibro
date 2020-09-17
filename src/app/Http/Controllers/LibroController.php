@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Libro;
+
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
+
+use App\Models\Libro;
 
 class LibroController extends Controller
 {
@@ -30,13 +35,44 @@ class LibroController extends Controller
     {
         $titulo = $request->input('titulo');
         $autor = $request->input('autor');
+        $image = $request->file('image');
+
+        $imageUri = $this->storeDocument($image);
 
         $libro = Libro::create([
             "titulo" => $titulo,
-            "autor" => $autor
+            "autor" => $autor,
+            "uri" => $imageUri->name,
+            "uri_key" => $imageUri->key,
         ]);
 
         return $libro;
+    }
+
+    public function storeDocument($file)
+    {
+        $filename = $this->generateFileName($file);
+        Storage::disk('imagenes')->put($filename, File::get($file));
+
+        if (Storage::disk('imagenes')->exists($filename)) {
+            return (object) array(
+                'name' => $filename,
+                'key' => Carbon::now()->timestamp
+            );
+        } else {
+            abort(403); //TODO : Pendiente verificar casos de error
+        }
+    }
+
+    public function generateFileName($file){
+        $extension = $file->getClientOriginalExtension();
+        $filename = 'newfile.img';
+
+        do {
+            $filename = rand(1999999, 99999999) . '.' . $extension;
+        } while (Storage::disk('imagenes')->exists($filename));
+
+        return $filename;
     }
 
     /**
@@ -93,4 +129,30 @@ class LibroController extends Controller
             return response()->json(array('status' => false));
         }
     }
+
+
+    public function getImage($id, $filename, $key)
+    {
+        $libro = Libro::where([
+            [ 'id', $id ],
+            [ 'uri', $filename ],
+            [ 'uri_key', $key ],
+        ])->get();
+
+        if($libro->count() == 1){
+            $libro = $libro->first();
+            // return response()->json($libro);
+
+            if (Storage::disk('imagenes')->exists($libro->uri)) {
+                return Storage::disk('imagenes')->response($libro->uri);
+            } else {
+                abort(404);
+            }
+
+        }
+
+        abort(404);
+    }
+
+
 }

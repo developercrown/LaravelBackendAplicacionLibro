@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,6 +11,7 @@ class Libro extends Model
     protected $fillable = [
         'titulo',
         'autor',
-        'uri'
+        'uri',
+        'uri_key'
     ];
 }
