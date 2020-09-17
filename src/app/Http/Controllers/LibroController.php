@@ -35,18 +35,20 @@ class LibroController extends Controller
     {
         $titulo = $request->input('titulo');
         $autor = $request->input('autor');
-        // $image = $request->file('image');
-
-        // $imageUri = $this->storeDocument($image);
+        $file = $request->file('portada');
+        $image = null;
+        
+        if($file){
+            $image = $this->storeDocument($file);
+        } else {
+            $image = (object) array("name" => null, "key" => null);
+        }
 
         $libro = Libro::create([
             "titulo" => $titulo,
             "autor" => $autor,
-            // "uri" => $imageUri->name,
-            // "uri_key" => $imageUri->key,
-
-            "uri" => null,
-            "uri_key" => null,
+            "uri" => $image->name,
+            "uri_key" => $image->key
         ]);
 
         return $libro;
