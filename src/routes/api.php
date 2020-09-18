@@ -25,5 +25,9 @@ Route::prefix('libros')->group(function () { // Rutas exclusivas para solicitant
     Route::post('/', 'LibroController@store');
     Route::put('/{id}', 'LibroController@update');
     Route::delete('/{id}', 'LibroController@destroy');
-    Route::get('/image/{id}/{filename}/{key}', 'LibroController@getImage');
+    Route::get('/image/{id}/{filename}/{key}/{definition}', 'LibroController@getImage');
+});
+
+Route::get('/info', function(){
+    return phpinfo();
 });

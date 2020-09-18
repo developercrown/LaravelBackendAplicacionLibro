@@ -45,6 +45,7 @@ services:
     container_name: php
     volumes:
       - ./src:/var/www/html:delegated
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     ports:
       - "9000:9000"
     networks:

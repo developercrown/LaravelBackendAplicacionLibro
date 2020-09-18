@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 
+// use Image;
+use Intervention\Image\ImageManagerStatic as Image;
+
 use App\Models\Libro;
 
 class LibroController extends Controller
@@ -43,6 +46,7 @@ class LibroController extends Controller
         } else {
             $image = (object) array("name" => null, "key" => null);
         }
+        
         $libro = Libro::create([
             "titulo" => $titulo,
             "autor" => $autor,
@@ -55,9 +59,26 @@ class LibroController extends Controller
     public function storeDocument($file)
     {
         $filename = $this->generateFileName($file);
-        Storage::disk('imagenes')->put($filename, File::get($file));
+        $imageFile = File::get($file);
 
-        if (Storage::disk('imagenes')->exists($filename)) {
+        $hdFolderPath = 'hd/';
+        $thumbFolderPath = 'thumb/';
+
+        Storage::disk('imagenes')->put($hdFolderPath.$filename, $imageFile);
+        Storage::disk('imagenes')->put($thumbFolderPath.$filename, $imageFile);
+
+        if (Storage::disk('imagenes')->exists($hdFolderPath.$filename) && Storage::disk('imagenes')->exists($thumbFolderPath.$filename)) {
+
+            $sourceFileStored = Storage::disk('imagenes')->path($thumbFolderPath.$filename);
+            $img = Image::make($sourceFileStored);
+
+            $img->resize(200, null, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+
+            $img->save($sourceFileStored);
+
             return (object) array(
                 'name' => $filename,
                 'key' => Carbon::now()->timestamp
@@ -76,6 +97,13 @@ class LibroController extends Controller
         } while (Storage::disk('imagenes')->exists($filename));
 
         return $filename;
+    }
+
+    public function createThumbnail($path, $width, $height) {
+        $img = Image::make($path)->resize($width, $height, function ($constraint) {
+            $constraint->aspectRatio();
+        });
+        $img->save($path);
     }
 
     /**
@@ -134,7 +162,7 @@ class LibroController extends Controller
     }
 
 
-    public function getImage($id, $filename, $key)
+    public function getImage($id, $filename, $key, $definition)
     {
         $libro = Libro::where([
             [ 'id', $id ],
@@ -144,8 +172,8 @@ class LibroController extends Controller
 
         if($libro->count() == 1){
             $libro = $libro->first();
-            if (Storage::disk('imagenes')->exists($libro->uri)) {
-                return Storage::disk('imagenes')->response($libro->uri);
+            if (Storage::disk('imagenes')->exists($definition."/".$libro->uri)) {
+                return Storage::disk('imagenes')->response($definition."/".$libro->uri);
             } else {
                 abort(404);
             }
