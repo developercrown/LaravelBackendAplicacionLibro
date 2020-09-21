@@ -84,7 +84,7 @@ class LibroController extends Controller
                 'key' => Carbon::now()->timestamp
             );
         } else {
-            abort(403); //TODO : Pendiente verificar casos de error
+            abort(403);
         }
     }
 
